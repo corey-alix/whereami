@@ -20,9 +20,11 @@ export class WhereAmI {
             this.savePosition(position);
             this.currentPosition = position;
         });
-        window.addEventListener("deviceorientation", event => {
-            const { alpha, beta, gamma } = event;
-            console.log(alpha, beta, gamma);
+        window.addEventListener("deviceorientationabsolute", event => {
+            const { absolute, alpha, beta, gamma } = event;
+            console.log(absolute, alpha, beta, gamma);
+            if (!absolute)
+                return;
             if (null === alpha)
                 return;
             // alpha is rotation around z-axis, when looking down at device
@@ -30,7 +32,7 @@ export class WhereAmI {
             // gamma is left to right motion, perfect for map
             this.currentOrientation = (alpha * Math.PI) / 180;
             this.options.map.getView().setRotation(this.currentOrientation);
-        });
+        }, true);
     }
     plotPosition(position) {
         const { coords, timestamp } = position;
