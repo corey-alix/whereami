@@ -21,11 +21,14 @@ export class WhereAmI {
             this.currentPosition = position;
         });
         window.addEventListener("deviceorientation", event => {
-            const { beta, gamma } = event;
-            if (beta === null)
+            const { alpha, beta, gamma } = event;
+            console.log(alpha, beta, gamma);
+            if (null === alpha)
                 return;
-            this.currentOrientation = (beta * Math.PI) / 180;
-            console.log(this.currentOrientation);
+            // alpha is rotation around z-axis, when looking down at device
+            // beta is font to back motion, not useful for map
+            // gamma is left to right motion, perfect for map
+            this.currentOrientation = (alpha * Math.PI) / 180;
             this.options.map.getView().setRotation(this.currentOrientation);
         });
     }
