@@ -4,7 +4,8 @@ const ol = globalThis.ol;
 export class WhereAmI {
   private source: ol.source.Vector;
   private activeFeature: ol.Feature;
-  currentPosition: Position|undefined;
+  currentPosition: Position | undefined;
+  currentOrientation: number | null = null;
 
   constructor(
     private options: {
@@ -30,17 +31,24 @@ export class WhereAmI {
       this.savePosition(position);
       this.currentPosition = position;
     });
+    window.addEventListener("deviceorientation", event => {
+      const { beta, gamma } = event;
+      if (beta === null) return;
+      this.currentOrientation = (beta * Math.PI) / 180;
+      console.log(this.currentOrientation);
+      this.options.map.getView().setRotation(this.currentOrientation);
+    });
   }
 
   plotPosition(position: Position): void {
     const { coords, timestamp } = position;
-    const { latitude, longitude } = coords;
+    const { latitude, longitude, heading } = coords;
     const mapLocation = this.transform(longitude, latitude);
 
     {
-      let center = mapLocation.getFirstCoordinate();
-      //center = this.transform(-82.3525, 34.87788).getFirstCoordinate();
-      this.options.map.getView().setCenter(center);
+      const center = mapLocation.getFirstCoordinate();
+      const view = this.options.map.getView();
+      view.setCenter(center);
     }
 
     const feature = new ol.Feature(mapLocation);

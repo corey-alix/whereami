@@ -2,6 +2,7 @@ const ol = globalThis.ol;
 export class WhereAmI {
     constructor(options) {
         this.options = options;
+        this.currentOrientation = null;
         const source = (this.source = new ol.source.Vector());
         const penLayer = new ol.layer.Vector({ source: source, visible: true });
         options.map.addLayer(penLayer);
@@ -19,15 +20,23 @@ export class WhereAmI {
             this.savePosition(position);
             this.currentPosition = position;
         });
+        window.addEventListener("deviceorientation", event => {
+            const { beta, gamma } = event;
+            if (beta === null)
+                return;
+            this.currentOrientation = (beta * Math.PI) / 180;
+            console.log(this.currentOrientation);
+            this.options.map.getView().setRotation(this.currentOrientation);
+        });
     }
     plotPosition(position) {
         const { coords, timestamp } = position;
-        const { latitude, longitude } = coords;
+        const { latitude, longitude, heading } = coords;
         const mapLocation = this.transform(longitude, latitude);
         {
-            let center = mapLocation.getFirstCoordinate();
-            //center = this.transform(-82.3525, 34.87788).getFirstCoordinate();
-            this.options.map.getView().setCenter(center);
+            const center = mapLocation.getFirstCoordinate();
+            const view = this.options.map.getView();
+            view.setCenter(center);
         }
         const feature = new ol.Feature(mapLocation);
         this.source.addFeature(feature);
