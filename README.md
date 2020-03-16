@@ -1,0 +1,1 @@
+Creates a map and plots your location as a trace line.  Now go and scribble the world.

@@ -1,0 +1,29 @@
+{
+  "name": "whereami",
+  "version": "1.0.0",
+  "description": "Creates a map and plots your location as a trace line.  Now go and scribble the world.",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/corey-alix/whereami.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/corey-alix/whereami/issues"
+  },
+  "homepage": "https://github.com/corey-alix/whereami#readme",
+  "dependencies": {
+    "typescript": "^3.9.0-dev.20200315"
+  },
+  "devDependencies": {
+    "@types/openlayers": "^4.6.17"
+  }
+}
