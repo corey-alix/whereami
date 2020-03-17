@@ -6,6 +6,8 @@ export class WhereAmI {
   private activeFeature: ol.Feature;
   currentPosition: Position | undefined;
   currentOrientation: number | null = null;
+  private bestAccuracy = 100;
+  private lastLocation: ol.geom.Point | null = null;
 
   constructor(
     private options: {
@@ -49,15 +51,24 @@ export class WhereAmI {
     );
   }
 
+  recenterMap() {
+    if (!this.lastLocation) return;
+    const center = this.lastLocation.getFirstCoordinate();
+    const view = this.options.map.getView();
+    view.setCenter(center);
+  }
+
   plotPosition(position: Position): void {
     const { coords, timestamp } = position;
-    const { latitude, longitude, heading } = coords;
-    const mapLocation = this.transform(longitude, latitude);
+    const { latitude, longitude, heading, accuracy } = coords;
+    const mapLocation = (this.lastLocation = this.transform(
+      longitude,
+      latitude
+    ));
 
-    {
-      const center = mapLocation.getFirstCoordinate();
-      const view = this.options.map.getView();
-      view.setCenter(center);
+    if (accuracy < this.bestAccuracy) {
+      this.bestAccuracy = accuracy;
+      this.recenterMap();
     }
 
     const feature = new ol.Feature(mapLocation);

@@ -3,6 +3,8 @@ export class WhereAmI {
     constructor(options) {
         this.options = options;
         this.currentOrientation = null;
+        this.bestAccuracy = 100;
+        this.lastLocation = null;
         const source = (this.source = new ol.source.Vector());
         const penLayer = new ol.layer.Vector({ source: source, visible: true });
         options.map.addLayer(penLayer);
@@ -34,14 +36,20 @@ export class WhereAmI {
             this.options.map.getView().setRotation(this.currentOrientation);
         }, true);
     }
+    recenterMap() {
+        if (!this.lastLocation)
+            return;
+        const center = this.lastLocation.getFirstCoordinate();
+        const view = this.options.map.getView();
+        view.setCenter(center);
+    }
     plotPosition(position) {
         const { coords, timestamp } = position;
-        const { latitude, longitude, heading } = coords;
-        const mapLocation = this.transform(longitude, latitude);
-        {
-            const center = mapLocation.getFirstCoordinate();
-            const view = this.options.map.getView();
-            view.setCenter(center);
+        const { latitude, longitude, heading, accuracy } = coords;
+        const mapLocation = (this.lastLocation = this.transform(longitude, latitude));
+        if (accuracy < this.bestAccuracy) {
+            this.bestAccuracy = accuracy;
+            this.recenterMap();
         }
         const feature = new ol.Feature(mapLocation);
         this.source.addFeature(feature);

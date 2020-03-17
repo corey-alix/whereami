@@ -3,6 +3,8 @@ import { LocationStorage } from "./LocationStorage.js";
 import { WhereAmI } from "./WhereAmI.js";
 import { ParcelImporter } from "./ParcelImporter.js";
 import { DataDumper } from "./DataDumper.js";
+import { FloodZoneLayer } from "./FloodZoneLayer.js";
+export const ol = globalThis.ol;
 
 async function askForPermission(title: string) {
   return new Promise<boolean>((good, bad) => {
@@ -28,7 +30,7 @@ async function run() {
   const storage = new LocationStorage("trip1");
   await storage.init();
 
-  const dumper = new DataDumper({storage, map});
+  const dumper = new DataDumper({ storage, map });
   dumper.dump();
 
   const whereAmI = new WhereAmI({ map, storage });
@@ -40,10 +42,39 @@ async function run() {
     importer.importParcelByLocation(whereAmI.currentPosition);
   });
 
-
   const importer = new ParcelImporter({ map });
   importer.importParcelById("0427000100102");
   importer.importParcelById("0428000101101");
+
+  const floodZone = new FloodZoneLayer({ map });
+  floodZone.hide();
+
+  watchGestures(map, {
+    "00": () => whereAmI.recenterMap(),
+    "02": () => floodZone.toggle()
+  });
+}
+
+type Dictionary<T> = any;
+
+function watchGestures(map: ol.Map, patterns: Dictionary<() => void>) {
+  let clickPattern = [] as Array<[number, number]>;
+  const [width, height] = map.getSize();
+  const columns = 2;
+  document.addEventListener("click", ev => {
+    console.log(ev);
+    clickPattern.push([
+      Math.floor(ev.screenX / (width / columns)),
+      Math.floor(ev.screenY / (height / columns))
+    ]);
+    if (2 <= clickPattern.length) {
+      console.log(clickPattern);
+      const key = clickPattern.map(xy => xy[0] + columns * xy[1]).join("");
+      console.log(key);
+      if (patterns[key]) patterns[key]();
+      clickPattern = [];
+    }
+  });
 }
 
 run();

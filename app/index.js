@@ -3,6 +3,8 @@ import { LocationStorage } from "./LocationStorage.js";
 import { WhereAmI } from "./WhereAmI.js";
 import { ParcelImporter } from "./ParcelImporter.js";
 import { DataDumper } from "./DataDumper.js";
+import { FloodZoneLayer } from "./FloodZoneLayer.js";
+export const ol = globalThis.ol;
 async function askForPermission(title) {
     return new Promise((good, bad) => {
         const button = document.createElement("button");
@@ -37,5 +39,31 @@ async function run() {
     const importer = new ParcelImporter({ map });
     importer.importParcelById("0427000100102");
     importer.importParcelById("0428000101101");
+    const floodZone = new FloodZoneLayer({ map });
+    floodZone.hide();
+    watchGestures(map, {
+        "00": () => whereAmI.recenterMap(),
+        "02": () => floodZone.toggle()
+    });
+}
+function watchGestures(map, patterns) {
+    let clickPattern = [];
+    const [width, height] = map.getSize();
+    const columns = 2;
+    document.addEventListener("click", ev => {
+        console.log(ev);
+        clickPattern.push([
+            Math.floor(ev.screenX / (width / columns)),
+            Math.floor(ev.screenY / (height / columns))
+        ]);
+        if (2 <= clickPattern.length) {
+            console.log(clickPattern);
+            const key = clickPattern.map(xy => xy[0] + columns * xy[1]).join("");
+            console.log(key);
+            if (patterns[key])
+                patterns[key]();
+            clickPattern = [];
+        }
+    });
 }
 run();
