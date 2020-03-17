@@ -1,15 +1,37 @@
 export class LocationStorage {
     constructor(storeName) {
         this.storeName = storeName;
-        const connection = indexedDB.open("LocationStorage", 1);
-        connection.onsuccess = ev => {
-            const db = (this.db = connection.result);
+    }
+    getPositions(filter, cb) {
+        if (!this.db)
+            return;
+        const transaction = this.db.transaction([this.storeName], "readonly");
+        const store = transaction.objectStore(this.storeName);
+        const cursor = store.openCursor(IDBKeyRange.bound(filter.start.valueOf(), filter.end.valueOf()));
+        cursor.onerror = err => {
+            console.error(err);
         };
-        connection.onerror = ev => { };
-        connection.onupgradeneeded = ev => {
-            const db = connection.result;
-            db.createObjectStore(storeName);
+        cursor.onsuccess = (event) => {
+            const result = cursor.result;
+            if (result && false !== cb(result.value))
+                result.continue();
         };
+    }
+    async init() {
+        return new Promise((good, bad) => {
+            const connection = indexedDB.open("LocationStorage", 1);
+            connection.onsuccess = ev => {
+                const db = (this.db = connection.result);
+                good(db);
+            };
+            connection.onerror = err => {
+                bad(err);
+            };
+            connection.onupgradeneeded = ev => {
+                const db = connection.result;
+                db.createObjectStore(this.storeName);
+            };
+        });
     }
     savePosition(position) {
         if (!this.db)

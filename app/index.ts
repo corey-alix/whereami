@@ -2,7 +2,7 @@ import { MapMaker } from "./MapMaker.js";
 import { LocationStorage } from "./LocationStorage.js";
 import { WhereAmI } from "./WhereAmI.js";
 import { ParcelImporter } from "./ParcelImporter.js";
-const ol = globalThis.ol;
+import { DataDumper } from "./DataDumper.js";
 
 async function askForPermission(title: string) {
   return new Promise<boolean>((good, bad) => {
@@ -26,6 +26,11 @@ async function run() {
   const mapMaker = new MapMaker();
   const map = mapMaker.makeMap();
   const storage = new LocationStorage("trip1");
+  await storage.init();
+
+  const dumper = new DataDumper({storage, map});
+  dumper.dump();
+
   const whereAmI = new WhereAmI({ map, storage });
   whereAmI.start();
 
@@ -34,6 +39,7 @@ async function run() {
     if (!whereAmI.currentPosition) return;
     importer.importParcelByLocation(whereAmI.currentPosition);
   });
+
 
   const importer = new ParcelImporter({ map });
   importer.importParcelById("0427000100102");
