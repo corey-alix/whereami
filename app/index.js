@@ -48,10 +48,10 @@ async function run() {
 }
 function watchGestures(map, patterns) {
     let clickPattern = [];
-    const [width, height] = map.getSize();
     const columns = 2;
     document.addEventListener("click", ev => {
         console.log(ev);
+        const [width, height] = map.getSize();
         clickPattern.push([
             Math.floor(ev.screenX / (width / columns)),
             Math.floor(ev.screenY / (height / columns))

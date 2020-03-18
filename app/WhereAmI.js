@@ -4,6 +4,7 @@ export class WhereAmI {
         this.options = options;
         this.currentOrientation = null;
         this.bestAccuracy = 100;
+        this.minimumAccuracy = 8;
         this.lastLocation = null;
         const source = (this.source = new ol.source.Vector());
         const penLayer = new ol.layer.Vector({ source: source, visible: true });
@@ -18,6 +19,10 @@ export class WhereAmI {
     }
     start() {
         navigator.geolocation.watchPosition(position => {
+            const accuracy = position.coords.accuracy;
+            if (accuracy > this.bestAccuracy && accuracy > this.minimumAccuracy)
+                return;
+            this.bestAccuracy = accuracy;
             this.plotPosition(position);
             this.savePosition(position);
             this.currentPosition = position;
@@ -46,11 +51,12 @@ export class WhereAmI {
     plotPosition(position) {
         const { coords, timestamp } = position;
         const { latitude, longitude, heading, accuracy } = coords;
-        const mapLocation = (this.lastLocation = this.transform(longitude, latitude));
-        if (accuracy < this.bestAccuracy) {
-            this.bestAccuracy = accuracy;
+        const mapLocation = this.transform(longitude, latitude);
+        if (!this.lastLocation) {
+            this.lastLocation = mapLocation;
             this.recenterMap();
         }
+        this.lastLocation = mapLocation;
         const feature = new ol.Feature(mapLocation);
         this.source.addFeature(feature);
         this.activeFeature.setGeometry(feature.getGeometry());

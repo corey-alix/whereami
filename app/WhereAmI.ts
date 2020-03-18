@@ -7,6 +7,7 @@ export class WhereAmI {
   currentPosition: Position | undefined;
   currentOrientation: number | null = null;
   private bestAccuracy = 100;
+  private minimumAccuracy = 8;
   private lastLocation: ol.geom.Point | null = null;
 
   constructor(
@@ -29,6 +30,10 @@ export class WhereAmI {
 
   start() {
     navigator.geolocation.watchPosition(position => {
+      const accuracy = position.coords.accuracy;
+      if (accuracy > this.bestAccuracy && accuracy > this.minimumAccuracy)
+        return;
+      this.bestAccuracy = accuracy;
       this.plotPosition(position);
       this.savePosition(position);
       this.currentPosition = position;
@@ -61,15 +66,14 @@ export class WhereAmI {
   plotPosition(position: Position): void {
     const { coords, timestamp } = position;
     const { latitude, longitude, heading, accuracy } = coords;
-    const mapLocation = (this.lastLocation = this.transform(
-      longitude,
-      latitude
-    ));
+    const mapLocation = this.transform(longitude, latitude);
 
-    if (accuracy < this.bestAccuracy) {
-      this.bestAccuracy = accuracy;
+    if (!this.lastLocation) {
+      this.lastLocation = mapLocation;
       this.recenterMap();
     }
+    this.lastLocation = mapLocation;
+
 
     const feature = new ol.Feature(mapLocation);
     this.source.addFeature(feature);

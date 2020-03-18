@@ -59,10 +59,10 @@ type Dictionary<T> = any;
 
 function watchGestures(map: ol.Map, patterns: Dictionary<() => void>) {
   let clickPattern = [] as Array<[number, number]>;
-  const [width, height] = map.getSize();
   const columns = 2;
   document.addEventListener("click", ev => {
     console.log(ev);
+    const [width, height] = map.getSize();
     clickPattern.push([
       Math.floor(ev.screenX / (width / columns)),
       Math.floor(ev.screenY / (height / columns))
