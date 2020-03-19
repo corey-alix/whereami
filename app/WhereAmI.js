@@ -3,8 +3,7 @@ export class WhereAmI {
     constructor(options) {
         this.options = options;
         this.currentOrientation = null;
-        this.bestAccuracy = 100;
-        this.minimumAccuracy = 8;
+        this.bestAccuracy = null;
         this.lastLocation = null;
         const source = (this.source = new ol.source.Vector());
         const penLayer = new ol.layer.Vector({ source: source, visible: true });
@@ -20,9 +19,9 @@ export class WhereAmI {
     start() {
         navigator.geolocation.watchPosition(position => {
             const accuracy = position.coords.accuracy;
-            if (accuracy > this.bestAccuracy && accuracy > this.minimumAccuracy)
+            if (null !== this.bestAccuracy && accuracy > 2 * this.bestAccuracy)
                 return;
-            this.bestAccuracy = accuracy;
+            this.bestAccuracy = Math.min(this.bestAccuracy || accuracy, accuracy);
             this.plotPosition(position);
             this.savePosition(position);
             this.currentPosition = position;

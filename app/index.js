@@ -4,18 +4,11 @@ import { WhereAmI } from "./WhereAmI.js";
 import { ParcelImporter } from "./ParcelImporter.js";
 import { DataDumper } from "./DataDumper.js";
 import { FloodZoneLayer } from "./FloodZoneLayer.js";
+import { watchGestures } from "./fun/watchGestures.js";
+import { askForPermission } from "./fun/askForPermission.js";
 export const ol = globalThis.ol;
-async function askForPermission(title) {
-    return new Promise((good, bad) => {
-        const button = document.createElement("button");
-        button.className = "ol-control big";
-        button.innerText = title;
-        document.body.appendChild(button);
-        button.onclick = () => {
-            good(true);
-            button.remove();
-        };
-    });
+function notify(message) {
+    askForPermission(message);
 }
 async function run() {
     const answer = await askForPermission("May I track your location?");
@@ -43,27 +36,9 @@ async function run() {
     floodZone.hide();
     watchGestures(map, {
         "00": () => whereAmI.recenterMap(),
-        "02": () => floodZone.toggle()
-    });
-}
-function watchGestures(map, patterns) {
-    let clickPattern = [];
-    const columns = 2;
-    document.addEventListener("click", ev => {
-        console.log(ev);
-        const [width, height] = map.getSize();
-        clickPattern.push([
-            Math.floor(ev.screenX / (width / columns)),
-            Math.floor(ev.screenY / (height / columns))
-        ]);
-        if (2 <= clickPattern.length) {
-            console.log(clickPattern);
-            const key = clickPattern.map(xy => xy[0] + columns * xy[1]).join("");
-            console.log(key);
-            if (patterns[key])
-                patterns[key]();
-            clickPattern = [];
-        }
+        "02": () => floodZone.toggle(),
+        "11": () => mapMaker.nextBasemap(),
+        otherwise: (code) => notify(`no gesture found: ${code}`)
     });
 }
 run();
