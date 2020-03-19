@@ -16,7 +16,10 @@ async function run() {
   const answer = await askForPermission("May I track your location?");
   if (!answer) return;
 
-  navigator.serviceWorker.register("./worker.js");
+  navigator.serviceWorker.register("./worker.js").then(async reg => {
+    await reg.update();
+    console.log("updated");
+  });
 
   const mapMaker = new MapMaker();
   const map = mapMaker.makeMap();
