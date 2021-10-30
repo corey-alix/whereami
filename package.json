@@ -7,7 +7,9 @@
     "test": "test"
   },
   "scripts": {
-    "test": "snowpack dev"
+    "test": "snowpack dev",
+    "dev": "snowpack dev",
+    "build": "snowpack build"
   },
   "repository": {
     "type": "git",

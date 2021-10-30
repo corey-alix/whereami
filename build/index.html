@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <title>OpenLayers PWA Example</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compaztible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>WhereAmI</title>
+    <meta name="WhereAmI" content="Plot your location on a map" />
+    <link rel="icon" href="/images/favicon.ico" type="image/x-icon" />
+
+    <link rel="manifest" href="./manifest.json" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+    <meta name="apple-mobile-web-app-title" content="WhereAmI" />
+    <link rel="apple-touch-icon" href="../static/icons/icon-152x152.png" />
+    <meta name="description" content="Draw your location on a map" />
+    <meta name="theme-color" content="#2F3BA2" />
+
+    <style>
+      .map {
+        position: absolute;
+        top: 0;
+        left: 0;
+        bottom: 0;
+        right: 0;
+      }
+
+      .big {
+        position: absolute;
+        left: 5vw;
+        top: 5vh;
+        width: 90vw;
+        height: 90vh;
+      }
+
+      .hidden {
+        display: none;
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="map" class="map"></div>
+    <script src="./index.js" type="module"></script>
+  </body>
+</html>

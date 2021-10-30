@@ -1,0 +1,18 @@
+{
+  "imports": {
+    "ol": "./ol.js",
+    "ol/geom": "./ol/geom.js",
+    "ol/geom/Point": "./ol/geom/Point.js",
+    "ol/interaction": "./ol/interaction.js",
+    "ol/layer/Tile": "./ol/layer/Tile.js",
+    "ol/layer/Vector": "./ol/layer/Vector.js",
+    "ol/proj": "./ol/proj.js",
+    "ol/source": "./ol/source.js",
+    "ol/source/Vector": "./ol/source/Vector.js",
+    "ol/style": "./ol/style.js",
+    "ol/style/Circle": "./ol/style/Circle.js",
+    "ol/style/Fill": "./ol/style/Fill.js",
+    "ol/style/Stroke": "./ol/style/Stroke.js",
+    "ol/style/Style": "./ol/style/Style.js"
+  }
+}
