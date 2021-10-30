@@ -1,6 +1,9 @@
+import TileLayer from "ol/layer/Tile";
+import { XYZ } from "ol/source";
+import { Map, View } from "ol";
 import { Dictionary } from "./types/Dictionary";
-
-const ol = globalThis.ol;
+import { DragPan } from "ol/interaction";
+import { fromLonLat } from "ol/proj";
 
 export class MapMaker {
   private urls: Dictionary<string> = {
@@ -12,15 +15,15 @@ export class MapMaker {
       "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}"
   };
 
-  private baseLayers: ol.layer.Tile[];
+  private baseLayers: TileLayer<XYZ>[];
   private baseLayerIndex: number = 0;
 
   constructor() {
     const keys = Object.keys(this.urls);
     this.baseLayers = keys.map(k => {
-      return new ol.layer.Tile({
+      return new TileLayer({
         visible: false,
-        source: new ol.source.XYZ({
+        source: new XYZ({
           attributions:
             'Tiles © <a href="https://services.arcgisonline.com/ArcGIS/' +
             'rest/services/World_Topo_Map/MapServer">ArcGIS</a>',
@@ -32,18 +35,18 @@ export class MapMaker {
 
   nextBasemap(): void {
     this.baseLayers[this.baseLayerIndex].setVisible(false);
-    this.baseLayerIndex = (1+this.baseLayerIndex) % this.baseLayers.length;
+    this.baseLayerIndex = (1 + this.baseLayerIndex) % this.baseLayers.length;
     this.baseLayers[this.baseLayerIndex].setVisible(true);
   }
 
   makeMap() {
-    const map = new ol.Map({
+    const map = new Map({
       target: "map",
       controls: [],
-      interactions: [new ol.interaction.DragPan()],
+      interactions: [new DragPan()],
       layers: this.baseLayers,
-      view: new ol.View({
-        center: ol.proj.fromLonLat([-82, 35]),
+      view: new View({
+        center: fromLonLat([-82, 35]),
         zoom: 19
       })
     });

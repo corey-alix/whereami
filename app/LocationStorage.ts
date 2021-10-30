@@ -1,4 +1,7 @@
+import { Coordinates, Position } from "./Coordinates";
+
 type CursorEvent = {};
+
 export class LocationStorage {
   getPositions(
     filter: { start: Date; end: Date },
@@ -22,7 +25,7 @@ export class LocationStorage {
   }
 
   private db: IDBDatabase | undefined;
-  constructor(public storeName: string) {}
+  constructor(public storeName: string) { }
 
   public async init() {
     return new Promise<IDBDatabase>((good, bad) => {

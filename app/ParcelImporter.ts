@@ -1,3 +1,11 @@
+import { Feature, Map } from "ol";
+import { Coordinate } from "ol/coordinate";
+import VectorLayer from "ol/layer/Vector";
+import Vector from "ol/source/Vector";
+import { Position } from "./Coordinates";
+import { Geometry, Point, Polygon } from "ol/geom";
+import { Fill, Stroke, Style } from "ol/style";
+
 const ParcelFeatureTypeInstance = {
   displayFieldName: "NAMECO",
   fieldAliases: {
@@ -340,17 +348,15 @@ const ParcelResponseByLocation = {
 export type ParcelFeatureType = typeof ParcelFeatureTypeInstance;
 export type ParcelResponseByLocation = typeof ParcelResponseByLocation;
 
-const ol = globalThis.ol;
-
 export class ParcelImporter {
-  private source: ol.source.Vector;
+  private source: Vector<Geometry>;
   constructor(
     private options: {
-      map: ol.Map;
+      map: Map;
     }
   ) {
-    const source = (this.source = new ol.source.Vector());
-    const penLayer = new ol.layer.Vector({ source: source, visible: true });
+    const source = (this.source = new Vector());
+    const penLayer = new VectorLayer({ source: source, visible: true });
     options.map.addLayer(penLayer);
   }
 
@@ -374,12 +380,12 @@ export class ParcelImporter {
 
   private drawParcel(parcel: ParcelFeatureType) {
     const agsGeom = parcel.features[0].geometry;
-    const olGeom = agsGeom.rings as ol.Coordinate[][];
-    const parcelGeom = new ol.geom.Polygon(olGeom);
-    const parcelFeature = new ol.Feature(parcelGeom);
-    const fill = new ol.style.Fill({ color: [255, 0, 0, 0.1] });
-    const stroke = new ol.style.Stroke({ color: "white", width: 1 });
-    const style = new ol.style.Style({ fill, stroke });
+    const olGeom = agsGeom.rings as Coordinate[][];
+    const parcelGeom = new Polygon(olGeom);
+    const parcelFeature = new Feature(parcelGeom);
+    const fill = new Fill({ color: [255, 0, 0, 0.1] });
+    const stroke = new Stroke({ color: "white", width: 1 });
+    const style = new Style({ fill, stroke });
     parcelFeature.setStyle(style);
     this.source.addFeature(parcelFeature);
   }
@@ -405,7 +411,7 @@ export class ParcelImporter {
       .getView()
       .calculateExtent(size)
       .join(",");
-    const [pixelWidth, pixelHeight] = size;
+    const [pixelWidth, pixelHeight] = size!;
 
     const urlTemplate = `https://www.gcgis.org/arcgis/rest/services/GreenvilleJS/Map_Layers_JS/MapServer/identify?f=json&tolerance=10&returnGeometry=true&returnFieldName=false&returnUnformattedValues=false&imageDisplay=${pixelWidth},${pixelHeight},96&geometry={"x":${x},"y":${y}}&geometryType=esriGeometryPoint&sr=3857&mapExtent=${mapExtent}&layers=all:53`;
     console.log(urlTemplate);
@@ -414,11 +420,11 @@ export class ParcelImporter {
   }
 
   private transform(longitude: number, latitude: number) {
-    const location = new ol.geom.Point([longitude, latitude]);
+    const location = new Point([longitude, latitude]);
     const mapLocation = location.transform(
       "EPSG:4326",
       "EPSG:3857"
-    ) as ol.geom.Point;
+    ) as Point;
     return mapLocation;
   }
 }

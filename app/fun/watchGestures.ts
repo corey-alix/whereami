@@ -1,3 +1,4 @@
+import { Map } from "ol";
 import { Dictionary } from "../types/Dictionary";
 
 let clickPattern = [] as Array<[number, number]>;
@@ -7,7 +8,7 @@ function clearPatterns() {
 }
 
 export function watchGestures(
-  map: ol.Map,
+  map: Map,
   patterns: Dictionary<(key: string) => void>
 ) {
   const columns = 2;
@@ -15,7 +16,7 @@ export function watchGestures(
     const ev = (event as any) as { pixel: number[] };
     console.log(ev);
     const [x, y] = ev.pixel;
-    const [width, height] = map.getSize();
+    const [width, height] = map.getSize()!;
     clickPattern.push([
       Math.floor(x / (width / columns)),
       Math.floor(y / (height / columns))

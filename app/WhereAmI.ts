@@ -1,28 +1,37 @@
+import { Map, Feature } from "ol";
+import Geometry from "ol/geom/Geometry";
+import Point from "ol/geom/Point";
+import VectorLayer from "ol/layer/Vector";
+import Vector from "ol/source/Vector";
+import Circle from "ol/style/Circle";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
+import Style from "ol/style/Style";
+import { Position } from "./Coordinates.js";
 import { LocationStorage } from "./LocationStorage.js";
-const ol = globalThis.ol;
 
 export class WhereAmI {
-  private source: ol.source.Vector;
-  private activeFeature: ol.Feature;
+  private source: Vector<Geometry>;
+  private activeFeature: Feature<Geometry>;
   currentPosition: Position | undefined;
   currentOrientation: number | null = null;
   private bestAccuracy: number | null = null;
-  private lastLocation: ol.geom.Point | null = null;
+  private lastLocation: Point | null = null;
 
   constructor(
     private options: {
-      map: ol.Map;
+      map: Map;
       storage: LocationStorage;
     }
   ) {
-    const source = (this.source = new ol.source.Vector());
-    const penLayer = new ol.layer.Vector({ source: source, visible: true });
+    const source = (this.source = new Vector<Geometry>());
+    const penLayer = new VectorLayer({ source: source, visible: true });
     options.map.addLayer(penLayer);
-    this.activeFeature = new ol.Feature();
-    const fill = new ol.style.Fill({ color: "red" });
-    const stroke = new ol.style.Stroke({ color: "white", width: 1 });
-    const circle = new ol.style.Circle({ radius: 10, stroke, fill });
-    const style = new ol.style.Style({ image: circle });
+    this.activeFeature = new Feature<Geometry>();
+    const fill = new Fill({ color: "red" });
+    const stroke = new Stroke({ color: "white", width: 1 });
+    const circle = new Circle({ radius: 10, stroke, fill });
+    const style = new Style({ image: circle });
     this.activeFeature.setStyle(style);
     this.source.addFeature(this.activeFeature);
   }
@@ -40,7 +49,7 @@ export class WhereAmI {
     window.addEventListener(
       "deviceorientationabsolute",
       event => {
-        const { absolute, alpha, beta, gamma } = event;
+        const { absolute, alpha, beta, gamma } = <DeviceOrientationEvent>event;
         console.log(absolute, alpha, beta, gamma);
         if (!absolute) return;
 
@@ -74,7 +83,7 @@ export class WhereAmI {
     this.lastLocation = mapLocation;
 
 
-    const feature = new ol.Feature(mapLocation);
+    const feature = new Feature(mapLocation);
     this.source.addFeature(feature);
     this.activeFeature.setGeometry(feature.getGeometry());
     this.source.removeFeature(this.activeFeature);
@@ -82,11 +91,11 @@ export class WhereAmI {
   }
 
   private transform(longitude: number, latitude: number) {
-    const location = new ol.geom.Point([longitude, latitude]);
+    const location = new Point([longitude, latitude]);
     const mapLocation = location.transform(
       "EPSG:4326",
       "EPSG:3857"
-    ) as ol.geom.Point;
+    ) as Point;
     return mapLocation;
   }
 

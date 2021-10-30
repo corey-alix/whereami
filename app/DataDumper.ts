@@ -1,24 +1,33 @@
 import { LocationStorage } from "./LocationStorage.js";
-export const ol = globalThis.ol;
+import Vector from "ol/source/Vector";
+import VectorLayer from "ol/layer/Vector";
+import Geometry from "ol/geom/Geometry";
+import Map from "ol/Map";
+import Fill from "ol/style/Fill";
+import Stroke from "ol/style/Stroke";
+import Circle from "ol/style/Circle";
+import Style from "ol/style/Style";
+import Point from "ol/geom/Point";
+import { Feature } from "ol";
 
 export class DataDumper {
-  private source: ol.source.Vector;
+  private source: Vector<Geometry>;
   constructor(private options: {
-    map: ol.Map;
+    map: Map;
     storage: LocationStorage;
   }) {
-    const source = (this.source = new ol.source.Vector());
-    const penLayer = new ol.layer.Vector({ source: source, visible: true });
-    const fill = new ol.style.Fill({ color: "green" });
-    const stroke = new ol.style.Stroke({ color: "white", width: 1 });
-    const circle = new ol.style.Circle({ radius: 3, stroke, fill });
-    const style = new ol.style.Style({ image: circle });
+    const source = (this.source = new Vector());
+    const penLayer = new VectorLayer({ source: source, visible: true });
+    const fill = new Fill({ color: "green" });
+    const stroke = new Stroke({ color: "white", width: 1 });
+    const circle = new Circle({ radius: 3, stroke, fill });
+    const style = new Style({ image: circle });
     penLayer.setStyle(style);
     options.map.addLayer(penLayer);
   }
   private transform(longitude: number, latitude: number) {
-    const location = new ol.geom.Point([longitude, latitude]);
-    const mapLocation = location.transform("EPSG:4326", "EPSG:3857") as ol.geom.Point;
+    const location = new Point([longitude, latitude]);
+    const mapLocation = location.transform("EPSG:4326", "EPSG:3857") as Point;
     return mapLocation;
   }
   dump() {
@@ -27,7 +36,7 @@ export class DataDumper {
     this.options.storage.getPositions({ start: bod, end: today }, position => {
       const { latitude, longitude, accuracy } = position;
       const mapLocation = this.transform(longitude, latitude);
-      const feature = new ol.Feature(mapLocation);
+      const feature = new Feature(mapLocation);
       this.source.addFeature(feature);
       return true;
     });

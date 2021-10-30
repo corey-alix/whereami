@@ -6,7 +6,6 @@ import { DataDumper } from "./DataDumper.js";
 import { FloodZoneLayer } from "./FloodZoneLayer.js";
 import { watchGestures } from "./fun/watchGestures.js";
 import { askForPermission } from "./fun/askForPermission.js";
-export const ol = globalThis.ol;
 
 function notify(message: string) {
   askForPermission(message);
