@@ -15,7 +15,7 @@ class CacheManager {
       if (200 === webResponse.status) {
         cache.put(evt.request.url, webResponse.clone());
       } else {
-          console.log(evt.request);
+        console.log(evt.request);
       }
       return webResponse;
     }

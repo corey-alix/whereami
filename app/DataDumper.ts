@@ -9,6 +9,7 @@ import Circle from "ol/style/Circle";
 import Style from "ol/style/Style";
 import Point from "ol/geom/Point";
 import { Feature } from "ol";
+import { getDateRange } from "./fun/getDateRange";
 
 export class DataDumper {
   private source: Vector<Geometry>;
@@ -25,14 +26,15 @@ export class DataDumper {
     penLayer.setStyle(style);
     options.map.addLayer(penLayer);
   }
+
   private transform(longitude: number, latitude: number) {
     const location = new Point([longitude, latitude]);
     const mapLocation = location.transform("EPSG:4326", "EPSG:3857") as Point;
     return mapLocation;
   }
+
   dump() {
-    const today = new Date();
-    const bod = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+    const { bod, eod: today } = getDateRange();
     this.options.storage.getPositions({ start: bod, end: today }, position => {
       const { latitude, longitude, accuracy } = position;
       const mapLocation = this.transform(longitude, latitude);
@@ -42,3 +44,4 @@ export class DataDumper {
     });
   }
 }
+

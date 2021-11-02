@@ -8,9 +8,13 @@ import Fill from "ol/style/Fill";
 import Stroke from "ol/style/Stroke";
 import Style from "ol/style/Style";
 import { Position } from "./Coordinates.js";
+import { getDateRange } from "./fun/getDateRange.js";
+import { log } from "./fun/log.js";
 import { LocationStorage } from "./LocationStorage.js";
 
-export class WhereAmI {
+type Location = { latitude: number; longitude: number };
+
+export class LocationViewer {
   private source: Vector<Geometry>;
   private activeFeature: Feature<Geometry>;
   currentPosition: Position | undefined;
@@ -37,15 +41,6 @@ export class WhereAmI {
   }
 
   start() {
-    navigator.geolocation.watchPosition(position => {
-      const accuracy = position.coords.accuracy;
-      if (null !== this.bestAccuracy && accuracy > 2 * this.bestAccuracy)
-        return;
-      this.bestAccuracy = Math.min(this.bestAccuracy || accuracy, accuracy);
-      this.plotPosition(position);
-      this.savePosition(position);
-      this.currentPosition = position;
-    });
     window.addEventListener(
       "deviceorientationabsolute",
       event => {
@@ -62,6 +57,14 @@ export class WhereAmI {
       },
       true
     );
+
+    const dateRange = getDateRange();
+    this.options.storage.getPositions({ start: dateRange.bod, end: dateRange.eod }, data => {
+      log(JSON.stringify(data));
+      const { latitude, longitude } = data;
+      this.plotPosition({ latitude, longitude });
+      return false;
+    });
   }
 
   recenterMap() {
@@ -71,9 +74,8 @@ export class WhereAmI {
     view.setCenter(center);
   }
 
-  plotPosition(position: Position): void {
-    const { coords, timestamp } = position;
-    const { latitude, longitude, heading, accuracy } = coords;
+  plotPosition(position: Location): void {
+    const { latitude, longitude } = position;
     const mapLocation = this.transform(longitude, latitude);
 
     if (!this.lastLocation) {
